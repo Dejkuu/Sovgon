@@ -57,47 +57,47 @@ module.exports = {
                         embedContent = 'Wyniki zostały wysłane  :tada:  Have Fun';
                         embedDescription = `O to super-pro-elo tegoroczna loteria mikołajkowa  :christmas_tree:\nPary zostaną wylosowane oraz wysłane do odpowiednich osób.`;
 
-                        setTimeout(() => {
-                            if (loopCount !== senders.length) {
-                                embedDescription = `Nie udało się wysłać wyników, ponieważ czas odpowiedzi został przekroczony!`;
-                                embedContent = 'Czas odpowiedzi przekroczony! <a:warning:1033698158921928754>';
-                                loopCount = senders.length + 1;
-                            }
-                        }, 2000);
-
                         try {
                             for (loopCount = 0; loopCount < senders.length;) {
                                 const min = 1;
                                 const max = Math.floor(senders.length);
-                                const randomID = Math.floor(Math.random() * (max - min + 1) + min);
 
-                                await Lottery.findOne({ "id": randomID, "isUsed": false })
-                                    .then(async recipient => {
-                                        if (recipient === null) return console.log(`\nDatabase-Lottery: ${chalk.redBright(`Match not found.`)}`);
+                                const randomSender = Math.floor(Math.random() * (max - min + 1) + min);
+                                const randomRecipient = Math.floor(Math.random() * (max - min + 1) + min);
 
-                                        const sendersPersonID = JSON.stringify(senders[loopCount].personID);
-                                        const recipientPersonID = JSON.stringify(recipient.personID);
+                                await Lottery.findOne({ "id": randomSender, "isSender": false })
+                                    .then(async sender => {
+                                        if (sender === null) return console.log(`\nDatabase-Lottery: ${chalk.redBright(`Sender not found`)}`);
 
-                                        if (sendersPersonID === recipientPersonID) return console.log(`\nDatabase-Lottery: ${chalk.redBright(`Copy detected.`)}`);
+                                        await Lottery.findOne({ "id": randomRecipient, "isRecipient": false })
+                                            .then(async recipient => {
+                                                if (recipient === null) return console.log(`\nDatabase-Lottery: ${chalk.redBright(`Recipient not found`)}`);
 
-                                        if (sendersPersonID === '"$numberDecimal":"351721648929636363"' && recipientPersonID === '$numberDecimal":"261823541530460160') {
-                                            return console.log(`\nDatabase-Lottery: ${chalk.redBright(`Result blocked.`)}`);
-                                        }
+                                                const senderPersonID = JSON.stringify(sender.personID);
+                                                const recipientPersonID = JSON.stringify(recipient.personID);
 
-                                        console.log(`${chalk.yellowBright(`${senders[loopCount].person} (${senders[loopCount].personID})`)} do ${chalk.yellowBright(`${recipient.person} (${recipient.personID})`)}`);
+                                                if (senderPersonID === recipientPersonID) return console.log(`\nDatabase-Lottery: ${chalk.redBright(`Copy detected`)}`);
 
-                                        await Lottery.updateOne({ "id": randomID }, { $set: { "isUsed": true } });
+                                                if (senderPersonID === '"$numberDecimal":"351721648929636363"' && recipientPersonID === '$numberDecimal":"261823541530460160') {
+                                                    return console.log(`\nDatabase-Lottery: ${chalk.redBright(`Result blocked`)}`);
+                                                }
 
-                                        const embed = new EmbedBuilder()
-                                            .setTitle(':mx_claus:  Czas Na Mi-Mi-Mikołajki  :mx_claus:')
-                                            .setDescription(` W tegorocznych mikołajkach prezent podarujesz: ${recipient.person} :partying_face: Miłej zabawy!`)
-                                            .setColor(0xe8f6f2)
-                                            .setFooter({ text: `Niechaj prezenty pójdą w ruch!` });
+                                                console.log(`${chalk.yellowBright(`${sender.person} (${sender.personID})`)} do ${chalk.yellowBright(`${recipient.person} (${recipient.personID})`)}`);
 
-                                        await client.users.send(`${senders[loopCount].personID}`, { embeds: [embed] });
+                                                await Lottery.updateOne({ "id": randomSender }, { $set: { "isSender": true } });
+                                                await Lottery.updateOne({ "id": randomRecipient }, { $set: { "isRecipient": true } });
 
-                                        loopCount++;
-                                        if (loopCount >= senders.length) console.log(`\nDatabase-Lottery: ${chalk.greenBright(`All good. Sending DMs to ${senders.length} persons...`)}`);
+                                                const embed = new EmbedBuilder()
+                                                    .setTitle(':mx_claus:  Czas Na Mi-Mi-Mikołajki  :mx_claus:')
+                                                    .setDescription(` W tegorocznych mikołajkach prezent podarujesz: ${recipient.person} :partying_face: Miłej zabawy!`)
+                                                    .setColor(0xe8f6f2)
+                                                    .setFooter({ text: `Niechaj prezenty pójdą w ruch!` });
+
+                                                await client.users.send(`${sender.personID}`, { embeds: [embed] });
+
+                                                loopCount++;
+                                                if (loopCount >= sender.length) console.log(`\nDatabase-Lottery: ${chalk.greenBright(`All good. Sending DMs to ${sender.length} persons...`)}`);
+                                            });
                                     });
                             }
                         } catch (error) {

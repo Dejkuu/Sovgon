@@ -14,7 +14,11 @@ const lotterySchema = new Schema({
     type: mongoose.Decimal128,
     required: true,
   },
-  isUsed: {
+  isSender: {
+    type: Boolean,
+    default: false,
+  },
+  isRecipient: {
     type: Boolean,
     default: false,
   },
