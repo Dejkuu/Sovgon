@@ -43,7 +43,7 @@ module.exports = {
         if (interaction.options.getSubcommand() === 'wynik') {
             await Lottery.find()
                 .then(async senders => {
-                    const minPerson = 4;
+                    const minPerson = 1;
 
                     if (senders.length === 0) {
                         embedContent = 'Brak członków w loterii. Aby kogoś dodać użyj "/loteria dodaj".';
@@ -88,7 +88,7 @@ module.exports = {
 
                                                 const embed = new EmbedBuilder()
                                                     .setTitle(':mx_claus:  Czas Na Mi-Mi-Mikołajki  :mx_claus:')
-                                                    .setDescription(` W tegorocznych mikołajkach prezent podarujesz: ${recipient.person} :partying_face: Miłej zabawy!`)
+                                                    .setDescription(` W tegorocznych mikołajkach prezent podarujesz: **${recipient.person}**  :partying_face:  Miłej zabawy!`)
                                                     .setColor(0xe8f6f2)
                                                     .setFooter({ text: `Niechaj prezenty pójdą w ruch!` });
 
