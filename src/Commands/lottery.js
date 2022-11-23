@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const Lottery = require('../Data/models/lotteryModel.js');
 const client = require('../Structure/client');
