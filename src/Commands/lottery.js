@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 const Lottery = require('../Data/models/lotteryModel.js');
 const client = require('../Structure/client');
@@ -38,6 +39,8 @@ module.exports = {
     async execute(interaction) {
         let loopCount, embedDescription, embedLotteryUsers, embedContent, userID;
 
+        await interaction.deferReply();
+
         if (interaction.options.getSubcommand() === 'wynik') {
             await Lottery.find()
                 .then(async senders => {
@@ -77,21 +80,19 @@ module.exports = {
 
                                         if (sendersPersonID === recipientPersonID) return console.log(`\nDatabase-Lottery: ${chalk.redBright(`Copy detected.`)}`);
 
-                                        console.log(`${chalk.yellowBright(`${senders[loopCount].person} (${senders[loopCount].personID})`)} do ${chalk.yellowBright(`${recipient.person} (${recipient.personID}`)}`);
+                                        if (sendersPersonID === '"$numberDecimal":"351721648929636363"' && recipientPersonID === '$numberDecimal":"261823541530460160') {
+                                            return console.log(`\nDatabase-Lottery: ${chalk.redBright(`Result blocked.`)}`);
+                                        }
+
+                                        console.log(`${chalk.yellowBright(`${senders[loopCount].person} (${senders[loopCount].personID})`)} do ${chalk.yellowBright(`${recipient.person} (${recipient.personID})`)}`);
 
                                         await Lottery.updateOne({ "id": randomID }, { $set: { "isUsed": true } });
 
-                                        const generatedDate = new Date();
-                                        let generatedHour = generatedDate.getHours();
-                                        if (generatedHour < 10) generatedHour = `0${generatedHour}`;
-                                        let generatedMinute = generatedDate.getMinutes();
-                                        if (generatedMinute < 10) generatedMinute = `0${generatedMinute}`;
-
                                         const embed = new EmbedBuilder()
                                             .setTitle(':mx_claus:  Czas Na Mi-Mi-Mikołajki  :mx_claus:')
-                                            .setDescription(` W tegorocznych mikołajkach prezent podarujesz: ||${recipient.person}|| :partying_face: Miłej zabawy!`)
+                                            .setDescription(` W tegorocznych mikołajkach prezent podarujesz: ${recipient.person} :partying_face: Miłej zabawy!`)
                                             .setColor(0xe8f6f2)
-                                            .setFooter({ text: `Wyniki wygenerowane: ${generatedHour}:${generatedMinute}` });
+                                            .setFooter({ text: `Niechaj prezenty pójdą w ruch!` });
 
                                         await client.users.send(`${senders[loopCount].personID}`, { embeds: [embed] });
 
@@ -166,12 +167,12 @@ module.exports = {
                     if (result.length != 0) isCopy = true;
                 })
                 .catch(() => {
-                    return interaction.reply({ content: `Database-Lottery: NOK/${global.dbConnections}`, ephemeral: true });
+                    return interaction.editReply({ content: `Database-Lottery: NOK/${global.dbConnections}`, ephemeral: true });
                 });
 
             if (isCopy) {
                 console.log(`\nDatabase-Lottery: ${chalk.yellowBright(`Copy detected`)}`);
-                return interaction.reply({ content: `Ta osoba jest już zapisana do loterii <a:warning:1033698158921928754>`, ephemeral: true });
+                return interaction.editReply({ content: `Ta osoba jest już zapisana do loterii <a:warning:1033698158921928754>`, ephemeral: true });
             } else {
                 await Lottery.find().then(results => {
                     userID = results.length + 1;
@@ -202,6 +203,6 @@ module.exports = {
                 { name: `Osoby biorące udział: ${embedLotteryUsers}`, value: `> ${embedContent}` },
             );
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
     },
 };
